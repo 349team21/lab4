@@ -24,12 +24,20 @@
 
 int task_create(task_t* tasks  __attribute__((unused)), size_t num_tasks  __attribute__((unused)))
 {
+	int i;
+	task_t task;
+
+	if(num_tasks > OS_MAX_TASKS)
+		return EINVAL;
+
+	//TODO check tasks doesn't point outside address space
+
+	if(!assign_schedule(&tasks, num_tasks))
+		return ESCHED;
+
+	allocate_tasks(&tasks, num_tasks);
+
   return 1; /* remove this line after adding your code */
-	//iterate through tasks
-	//verify they are schedulable?
-	//schedule them
-	//do something with the device for the task
-	//call runqueue_add
 }
 
 int event_wait(unsigned int dev  __attribute__((unused)))

@@ -24,6 +24,19 @@
 
 int task_create(task_t* tasks  __attribute__((unused)), size_t num_tasks  __attribute__((unused)))
 {
+	int i;
+	task_t task;
+
+	if(num_tasks > OS_MAX_TASKS)
+		return EINVAL;
+
+	//TODO check tasks doesn't point outside address space
+
+	if(!assign_schedule(&tasks, num_tasks)
+		return ESCHED;
+
+	allocate_tasks(&tasks, num_tasks);
+
   return 1; /* remove this line after adding your code */
 }
 
