@@ -13,6 +13,10 @@
 #include <sched.h>
 #include <device.h>
 #include <assert.h>
+#include <arm/timer.h>
+#include <arm/reg.h>
+#include <arm/interrupt.h>
+#include <lock.h>
 
 #define SWI_VECTOR_ADDR 0x00000008
 #define IRQ_VECTOR_ADDR 0x00000018
@@ -24,6 +28,7 @@
 
 extern void handleSWI(void);
 extern void handleIRQ(void);
+extern int toUSER(int argc, char* argv[]);
 volatile size_t current_time;
 volatile size_t start_time;
 

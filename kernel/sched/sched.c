@@ -55,12 +55,12 @@ void allocate_tasks(task_t** tasks  __attribute__((unused)), size_t num_tasks  _
 
 	runqueue_init();
 
-	for(i = 0; i < num_task; i++){
+	for(i = 0; i < num_tasks; i++){
 		tcb = &system_tcb[i];
 		tcb->native_prio = i;
 		//tcb.cur_prio = ?
 		tcb->holds_lock = 0;
-		tcb->sleep_queue = NULL;
+		tcb->sleep_queue = (tcb_t*) 0;
 		tcb->context.r4 = *((uint32_t*)tasks[i]->lambda); // HOW?!
 		tcb->context.r5 = *((uint32_t*)tasks[i]->data);
 		tcb->context.r6 = *((uint32_t*)tasks[i]->stack_pos);

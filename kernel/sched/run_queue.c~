@@ -13,6 +13,7 @@
 #include <sched.h>
 #include "sched_i.h"
 
+#include "run_queue_i.h"
 
 
 static tcb_t* run_list[OS_MAX_TASKS]  __attribute__((unused));
@@ -110,7 +111,6 @@ tcb_t* runqueue_remove(uint8_t prio  __attribute__((unused)))
 	tcb_t* tcb = run_list[prio];
 	run_list[prio] = (tcb_t*) 0;
 
-	//should prio be decremented?
 
 	// update group_run_bits
 	uint8_t y;

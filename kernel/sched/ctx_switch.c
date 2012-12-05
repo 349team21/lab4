@@ -13,6 +13,7 @@
 #include <config.h>
 #include <kernel.h>
 #include "sched_i.h"
+#include "run_queue_i.h"
 
 #ifdef DEBUG_MUTEX
 #include <exports.h>
@@ -44,7 +45,7 @@ void dispatch_init(tcb_t* idle __attribute__((unused)))
 void dispatch_save(void)
 {
 	uint8_t hi_prio;
-	hi_prio = highest_prio(void);
+	hi_prio = highest_prio();
 	
 	tcb_t* hi_tcb;
 	hi_tcb = run_list[hi_prio];
@@ -55,7 +56,7 @@ void dispatch_save(void)
 	prev = cur_tcb;
 	cur_tcb = hi_tcb;
 
-	ctx_switch_full(&(cur_tcb.context), &(prev.context));
+	ctx_switch_full(&(cur_tcb->context), &(prev->context));
 
 }
 
@@ -68,7 +69,7 @@ void dispatch_save(void)
 void dispatch_nosave(void)
 {
 	uint8_t hi_prio;
-	hi_prio = highest_prio(void);
+	hi_prio = highest_prio();
 	
 	tcb_t* hi_tcb;
 	hi_tcb = run_list[hi_prio];
@@ -77,7 +78,7 @@ void dispatch_nosave(void)
 
 	cur_tcb = hi_tcb;
 
-	ctx_switch_half(&(cur_tcb.context));
+	ctx_switch_half(&(cur_tcb->context));
 
 }
 
@@ -99,7 +100,7 @@ void dispatch_sleep(void)
 uint8_t get_cur_prio(void)
 {
 	uint8_t prio;
-	prio = cur_tcb.cur_prio;
+	prio = cur_tcb->cur_prio;
 	return prio;
 }
 
