@@ -57,9 +57,6 @@ void dispatch_save(void)
 
 	ctx_switch_full(&(cur_tcb.context), &(prev.context));
 
-//somewhere in here we need to call launch_task?
-//add to runlist? (xinwu)
-
 }
 
 /**
@@ -82,8 +79,6 @@ void dispatch_nosave(void)
 
 	ctx_switch_half(&(cur_tcb.context));
 
-	//somewhere in here we need to call launch_task?
-	//add to runlist? (xinwu)
 }
 
 

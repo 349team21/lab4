@@ -84,7 +84,6 @@ void runqueue_add(tcb_t* tcb  __attribute__((unused)), uint8_t prio  __attribute
 	// update the run list
 	run_list[prio] = tcb;
 
-	//should prio be incremented?
 	
 	// update group_run_bits
 	uint8_t y;
@@ -111,7 +110,6 @@ tcb_t* runqueue_remove(uint8_t prio  __attribute__((unused)))
 	tcb_t* tcb = run_list[prio];
 	run_list[prio] = (tcb_t*) 0;
 
-	//should prio be decremented?
 
 	// update group_run_bits
 	uint8_t y;

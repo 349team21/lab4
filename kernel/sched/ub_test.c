@@ -30,6 +30,10 @@
 int assign_schedule(task_t** tasks  __attribute__((unused)), size_t num_tasks  __attribute__((unused)))
 {
 
+	//initially tasks points to an array of tasks.
+	// we create a temporary array of task*'s and then set our task** to
+	// this temp before returning
+
 	return 1; // fix this; dummy return to prevent compiler warnings	
 
 	//don't assume sorted, sort list and check schedulability for each task

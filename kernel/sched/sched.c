@@ -50,9 +50,32 @@ static void __attribute__((unused)) idle(void)
  */
 void allocate_tasks(task_t** tasks  __attribute__((unused)), size_t num_tasks  __attribute__((unused)))
 {
+	uint8_t i;
+	tcb_t* tcb;
 
-	//initialize tcb fields for all tasks and idle task
-	//call dispatch_nosave?
+	runqueue_init();
+
+	for(i = 0; i < num_task; i++){
+		tcb = &system_tcb[i];
+		tcb->native_prio = i;
+		//tcb.cur_prio = ?
+		tcb->holds_lock = 0;
+		tcb->sleep_queue = NULL;
+		tcb->context.r4 = *((uint32_t*)tasks[i]->lambda); // HOW?!
+		tcb->context.r5 = *((uint32_t*)tasks[i]->data);
+		tcb->context.r6 = *((uint32_t*)tasks[i]->stack_pos);
+		runqueue_add(tcb, i);
+	}
+
+	tcb_t* idle;
+
+	//set up idle tcb
+	
+	//add idle task
+	dispatch_init(idle);
+	
+	//call dispatch_nosave
+	dispatch_nosave();
 	
 }
 

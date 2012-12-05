@@ -31,6 +31,8 @@ int assign_schedule(task_t** tasks  __attribute__((unused)), size_t num_tasks  _
 {
 
 	return 1; // fix this; dummy return to prevent compiler warnings	
+
+	//don't assume sorted, sort list and check schedulability for each task
 }
 	
 
