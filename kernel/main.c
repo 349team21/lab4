@@ -39,8 +39,7 @@ extern void handleIRQ(void);
 extern int toUSER(int argc, char* argv[]);
 extern ssize_t read_syscall(int fd, void* buf, size_t count);
 extern ssize_t write_syscall(int fd, const void* buf, size_t count);
-volatile size_t current_time;
-volatile size_t start_time;
+extern void time_init(void);
 
 int kmain(int argc __attribute__((unused)), char** argv  __attribute__((unused)), uint32_t table)
 {
@@ -108,20 +107,9 @@ int kmain(int argc __attribute__((unused)), char** argv  __attribute__((unused))
 	*(old_irq_handler  ) = LDR_PC_NEXT;
 	*(old_irq_handler+1) = (unsigned long) &handleIRQ;
 
-
-	//Interrupt setup
-	reg_write(INT_ICMR_ADDR, (0x1 << INT_OSTMR_0));
-	reg_write(INT_ICLR_ADDR, (0x0 << INT_OSTMR_0));
-
-	//Oscillator setup
-	reg_clear(OSTMR_OIER_ADDR, OSTMR_OIER_E1 | OSTMR_OIER_E2 | OSTMR_OIER_E3);
-	reg_write(OSTMR_OIER_ADDR, OSTMR_OIER_E0);
-
-	reg_write(OSTMR_OSCR_ADDR, 0x0);
-	start_time = reg_read(OSTMR_OSCR_ADDR);
-	reg_write(OSTMR_OSMR_ADDR(0), (OSTMR_FREQ/100));
+	//initialize timers
+	time_init();
 	
-
 	// Initialize mutexes
 	mutex_init();
 

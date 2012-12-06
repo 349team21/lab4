@@ -24,14 +24,12 @@
 
 int task_create(task_t* tasks  __attribute__((unused)), size_t num_tasks  __attribute__((unused)))
 {
-	int i;
-	task_t task;
 
 	if(num_tasks > OS_MAX_TASKS - 2)
 		return -EINVAL;
 
 	//TODO check these bounds are right
-	if ((tasks  <  0xa0000000) || (tasks > 0xa3ffffff)) {
+	if (((size_t)tasks  <  (size_t)0xa0000000) || ((size_t)tasks > (size_t)0xa3ffffff)) {
 		return -EFAULT;
 	}
 
