@@ -27,7 +27,7 @@ int task_create(task_t* tasks  __attribute__((unused)), size_t num_tasks  __attr
 	int i;
 	task_t task;
 
-	if(num_tasks > OS_MAX_TASKS)
+	if(num_tasks > OS_MAX_TASKS - 2)
 		return EINVAL;
 
 	//TODO check tasks doesn't point outside address space
