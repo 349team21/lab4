@@ -45,8 +45,11 @@ static dev_t devices[NUM_DEVICES];
  */
 void dev_init(void)
 {
-   /* the following line is to get rid of the warning and should not be needed */	
-   devices[0]=devices[0];
+	unsigned int i;
+	for (i = 0; i < NUM_DEVICES; i++){
+		devices[i].sleep_queue = (tcb_t*) 0;
+		devices[i].next_match = dev_freq[i];
+	}
 }
 
 
@@ -58,7 +61,24 @@ void dev_init(void)
  */
 void dev_wait(unsigned int dev __attribute__((unused)))
 {
-	
+	tcb_t* cur_tcb;
+	tcb_t* sleep_q;
+
+	disable_interrupts();
+
+	cur_tcb = get_cur_tcb();
+	if (devices[dev].sleep_queue == (tcb_t*) 0){
+		devices[dev].sleep_queue = cur_tcb;
+		cur_tcb->sleep_queue = (tcb_t*) 0;
+	}
+	else{
+		sleep_q = devices[dev].sleep_queue;
+		while (sleep_q->sleep_queue != (tcb_t*) 0){
+			sleep_q = sleep_q->sleep_queue;
+		}
+		sleep_q->sleep_queue = cur_tcb;
+		cur_tcb->sleep_queue = (tcb_t*) 0;
+	}
 }
 
 
@@ -71,6 +91,21 @@ void dev_wait(unsigned int dev __attribute__((unused)))
  */
 void dev_update(unsigned long millis __attribute__((unused)))
 {
-	
+	unsigned int i;
+	disable_interrupts();
+	for (i = 0; i< NUM_DEVICES; i++){
+		if (millis >= devices[i].next_match){
+			//update next match
+			devices[i].next_match = current_time + dev_freq[i];
+			//Wake up sleepqueue and add into runqueque
+			while (devices[i].sleep_queue != (tcb_t*) 0) {
+				tcb_t* tmp;
+				tmp = devices[i].sleep_queue;
+				runqueue_add(tmp, tmp->cur_prio);
+				devices[i].sleep_queue = devices[i].sleep_queue->sleep_queue;
+				tmp->sleep_queue = (tcb_t*) 0;
+			}
+		}
+	}
 }
 

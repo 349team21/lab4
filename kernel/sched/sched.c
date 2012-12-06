@@ -53,7 +53,11 @@ void allocate_tasks(task_t** tasks  __attribute__((unused)), size_t num_tasks  _
 	uint8_t i;
 	tcb_t* tcb;
 
+	printf("Checkpoint 9...\n");
+
 	runqueue_init();
+
+	printf("Checkpoint 10...\n");
 
 	for(i = 0; i < num_tasks; i++){
 		tcb = &system_tcb[i];
@@ -67,6 +71,8 @@ void allocate_tasks(task_t** tasks  __attribute__((unused)), size_t num_tasks  _
 		runqueue_add(tcb, i);
 	}
 
+	printf("Checkpoint 11...\n");
+
 	//set up idle tcb
 	tcb = &system_tcb[OS_MAX_TASKS - 1];
 	tcb->native_prio = OS_MAX_TASKS - 1;
@@ -75,9 +81,13 @@ void allocate_tasks(task_t** tasks  __attribute__((unused)), size_t num_tasks  _
 	tcb->sleep_queue = (tcb_t*) 0;
 	tcb->context.r4 = (uint32_t)&idle;
 
+	printf("Checkpoint 12...\n");
+
 	//add idle task
 	dispatch_init(tcb);
 	
+	printf("Checkpoint 13...\n");
+
 	//call dispatch_nosave
 	dispatch_nosave();
 	

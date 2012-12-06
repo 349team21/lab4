@@ -25,6 +25,8 @@
 int task_create(task_t* tasks  __attribute__((unused)), size_t num_tasks  __attribute__((unused)))
 {
 
+	printf("Checkpoint 7...\n");
+
 	if(num_tasks > OS_MAX_TASKS - 2)
 		return -EINVAL;
 
@@ -32,6 +34,8 @@ int task_create(task_t* tasks  __attribute__((unused)), size_t num_tasks  __attr
 	if (((size_t)tasks  <  (size_t)0xa0000000) || ((size_t)tasks > (size_t)0xa3ffffff)) {
 		return -EFAULT;
 	}
+
+	printf("Checkpoint 8...\n");
 
 	if(!assign_schedule(&tasks, num_tasks))
 		return -ESCHED;

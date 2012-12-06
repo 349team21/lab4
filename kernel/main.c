@@ -18,6 +18,7 @@
 #include <arm/interrupt.h>
 #include <bits/swi.h>
 #include <lock.h>
+#include <syscall.h>
 
 #define SWI_VECTOR_ADDR 0x00000008
 #define IRQ_VECTOR_ADDR 0x00000018
@@ -37,8 +38,6 @@ unsigned int* uboot_irq_addr;
 extern void handleSWI(void);
 extern void handleIRQ(void);
 extern int toUSER(int argc, char* argv[]);
-extern ssize_t read_syscall(int fd, void* buf, size_t count);
-extern ssize_t write_syscall(int fd, const void* buf, size_t count);
 extern void time_init(void);
 
 int kmain(int argc __attribute__((unused)), char** argv  __attribute__((unused)), uint32_t table)
@@ -55,6 +54,8 @@ int kmain(int argc __attribute__((unused)), char** argv  __attribute__((unused))
 	unsigned long irq_vector = *(unsigned long *)IRQ_VECTOR_ADDR;
 	long swi_offset;
 	long irq_offset;
+
+	printf("Checkpoint 1...\n");
 	
 	
 	
@@ -80,6 +81,8 @@ int kmain(int argc __attribute__((unused)), char** argv  __attribute__((unused))
 	/* Redirect U-Boot's SWI handler to ours. */
 	*(old_swi_handler  ) = LDR_PC_NEXT;
 	*(old_swi_handler + 1) = (unsigned long) &handleSWI;
+
+	printf("Checkpoint 2...\n");
 	
 	
 	
@@ -100,6 +103,8 @@ int kmain(int argc __attribute__((unused)), char** argv  __attribute__((unused))
 		irq_offset = -(irq_vector & LDR_IMM_MASK);
 	}
 
+	printf("Checkpoint 3...\n");
+
 	/* Find the location of U-Boot's SWI/IRQ handler. */
 	old_irq_handler = *(unsigned long **)(IRQ_VECTOR_ADDR + PC_OFFSET + irq_offset);
 
@@ -107,11 +112,17 @@ int kmain(int argc __attribute__((unused)), char** argv  __attribute__((unused))
 	*(old_irq_handler  ) = LDR_PC_NEXT;
 	*(old_irq_handler+1) = (unsigned long) &handleIRQ;
 
+	printf("Checkpoint 4...\n");
+
 	//initialize timers
 	time_init();
+
+	printf("Checkpoint 5...\n");
 	
 	// Initialize mutexes
 	mutex_init();
+
+	printf("Checkpoint 6...\n");
 
 	printf("MAKING USER SWITCH\n");
 	toUSER(argc, argv);
@@ -144,6 +155,13 @@ int my_swi_dispatcher(int swi_number, int* args_ptr)
 			result = (int) write_syscall((int)args_ptr[0], (void *)args_ptr[1], (size_t)args_ptr[2]);
 			break;
 
+		case CREATE_SWI:
+			//create takes two parameters: task_t* tasks, size_t num_tasks
+			result = (int) task_create((task_t*)args_ptr[0], (size_t) args_ptr[1]);
+
+		default:
+			invalid_syscall(swi_number);
+			break;
 	}
 	return result;
 }

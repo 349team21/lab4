@@ -94,9 +94,9 @@ void dev_update(unsigned long millis __attribute__((unused)))
 	unsigned int i;
 	disable_interrupts();
 	for (i = 0; i< NUM_DEVICES; i++){
-		if (millis == dev_freq[i].next_match){
+		if (millis >= devices[i].next_match){
 			//update next match
-			dev_freq[i].next_match += dev_freq[i];
+			devices[i].next_match = millis + dev_freq[i];
 			//Wake up sleepqueue and add into runqueque
 			while (devices[i].sleep_queue != (tcb_t*) 0) {
 				tcb_t* tmp;
