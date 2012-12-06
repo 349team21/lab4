@@ -27,39 +27,22 @@ int task_create(task_t* tasks  __attribute__((unused)), size_t num_tasks  __attr
 	int i;
 	task_t task;
 
-	if (num_tasks > OS_MAX_TASKS )
+	if(num_tasks > OS_MAX_TASKS - 2)
 		return EINVAL;
 
 
 	if(!assign_schedule(&tasks, num_tasks))
 		return ESCHED;
 
-	allocate_tasks(&tasks, num_tasks);
-
-  return 1; /* remove this line after adding your code */
-
-	/* check for failure condition */
-	if(num_tasks>OS_MAX_TASKS-2)
-		return EINVAL;
-
-	/* disable interrupts before we are done setting up tasks */
-	disable_interrupts();
-
-	/* initialize the run queue */
 	runqueue_init();
 
-	/* initialize devices */
 	dev_init();
 
-	/* allocate tasks and set them as runnable */
 	allocate_tasks(&tasks, num_tasks);
 
-	/* dispatch to first task available */
 	dispatch_nosave();
 
   	return 0xbadc0de;
-
-
 
 }
 

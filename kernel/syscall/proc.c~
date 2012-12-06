@@ -32,7 +32,7 @@ int task_create(task_t* tasks  __attribute__((unused)), size_t num_tasks  __attr
 
 	//TODO check tasks doesn't point outside address space
 
-	if(!assign_schedule(&tasks, num_tasks)
+	if(!assign_schedule(&tasks, num_tasks))
 		return ESCHED;
 
 	allocate_tasks(&tasks, num_tasks);

@@ -69,7 +69,7 @@ void dispatch_save(void)
 void dispatch_nosave(void)
 {
 	uint8_t hi_prio;
-	hi_prio = highest_prio(void);
+	hi_prio = highest_prio();
 	
 	tcb_t* hi_tcb;
 	hi_tcb = run_list[hi_prio];

@@ -30,7 +30,7 @@ static __attribute__((unused)) tcb_t* cur_tcb; /* use this if needed */
 void dispatch_init(tcb_t* idle __attribute__((unused)))
 {
 	cur_tcb = idle;
-	runqueue_add(cur_tcb, 63); //lowest priority for idle task
+	runqueue_add(cur_tcb, OS_MAX_TASKS - 1); //lowest priority for idle task
 }
 
 
