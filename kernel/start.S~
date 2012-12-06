@@ -28,6 +28,8 @@
 	.type toUSER, %function
 	.global handleIRQ
 	.type handleIRQ, %function
+	.global exit_kernel
+	.type exit_kernel, %function
 	
 	/*
 	 * Branch immediately to main without altering the execution environment.

@@ -1,0 +1,89 @@
+/** @file io.c
+ *
+ * @brief Kernel I/O syscall implementations
+ *
+ * @author Mike Kasick <mkasick@andrew.cmu.edu>
+ * @date   Sun, 14 Oct 2007 00:07:38 -0400
+ *
+ * @author Kartik Subramanian <ksubrama@andrew.cmu.edu>
+ * @date   2008-11-16
+ */
+
+#include <types.h>
+#include <bits/errno.h>
+#include <bits/fileno.h>
+#include <arm/physmem.h>
+#include <syscall.h>
+#include <exports.h>
+#include <kernel.h>
+
+#define EOT_CHAR 0x04
+#define DEL_CHAR 0x7f
+
+
+/* Read count bytes (or less) from fd into the buffer buf. */
+ssize_t read_syscall(int fd __attribute__((unused)), void *buf __attribute__((unused)), size_t count __attribute__((unused)))
+{
+
+  /* U-Boot can only write to stdout */
+	if (fd != STDIN_FILENO) {
+		return -EBADF;
+	}
+	// Check buffer's memory range to make sure it's inside readable memory
+	if (((unsigned int)buf  <  (unsigned int)0xa0000000) || (((unsigned int)(((unsigned int*) buf) + count)) > (unsigned int)0xa3ffffff)) {
+	return -EFAULT;
+	}
+	ssize_t num_read = 0;
+	/*
+	 * the buffer has to be null terminated, so last char must be '\0'
+	 * hence at most can read in count - 1 characters from stdin
+	 */
+	if (count == 0) return num_read;
+	while (((size_t)num_read) < count )
+	{
+		int character = getc();
+		switch (character)
+		{
+			/* EOT character */
+			case 4:
+				return num_read;
+			
+			/* Backspace or Delete */
+			case 8:
+			case 127:
+				if (num_read > 0)
+				{
+					num_read --;
+					puts("\b \b");
+				}
+				
+			
+			/* Newline or carriage return*/
+			case 10:
+			case 13:
+				((char*) buf)[num_read] = '\n';
+				putc('\n');
+				num_read ++;
+				return num_read;
+			
+			/* Normal characters */
+			default:
+				((char*) buf)[num_read] = character;
+				putc(character);
+				num_read++;
+		}
+	}
+	
+	
+	return num_read;
+	
+}
+
+/* Write count bytes to fd from the buffer buf. */
+ssize_t write_syscall(int fd  __attribute__((unused)), const void *buf  __attribute__((unused)), size_t count  __attribute__((unused)))
+{
+
+  return 1; /* remove this return line after you have added your code here */
+	
+}
+

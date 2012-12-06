@@ -9,8 +9,8 @@
 #include <asm.h>
 #include <bits/swi.h>
 
-	.file "task_create.S"
+	.file "mutex_create.S"
 
-FUNC(task_create)
-	swi CREATE_SWI
+FUNC(mutex_create)
+	swi MUXTEX_CREATE
 	mov pc, lr

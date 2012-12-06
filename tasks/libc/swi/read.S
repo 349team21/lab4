@@ -1,17 +1,23 @@
-/** @file read.S
- *
- * @brief read sycall wrapper
- *
- * @author Mike Kasick <mkasick@andrew.cmu.edu>
- * @date   Sun, 07 Oct 2007 01:53:16 -0400
- * 
- * @author Kartik Subramanian <ksubrama@andrew.cmu.edu>
- * @date 2008-10-29
- */
+@ read.S: read sycall wrapper
+@
+@ Authors: William Westlin <williamawestlin@gmail.com>
+@          Martin (Yian) Gao <martin701.gao@gmail.com>
+@		   Xinwu Yang <xinwuy@gmail.com>
+@ Date:    10/06/2012
+#include <bits/swi.h>
 
-#include <asm.h>
+	.file	"read.S"
+	.text
 
-	.file "read.S"
-
-FUNC(read)
-	@ Add code here.  Put your names at the top.
+	.global	read
+read:
+	swi	READ_SWI
+	cmp	r0, #0
+	bge	success
+	rsb r0, #0
+	ldr	r2, =errno
+	str	r0, [r2]
+	mov	r0, #-1	
+success:
+	mov	pc, lr
+	

@@ -7,10 +7,9 @@
  */
 
 #include <asm.h>
-#include <bits/swi.h>
 
-	.file "task_create.S"
+	.file "mutex_unlock.S"
 
-FUNC(task_create)
-	swi CREATE_SWI
+FUNC(mutex_unlock)
+	swi MUTEX_UNLOCK
 	mov pc, lr

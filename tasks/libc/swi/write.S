@@ -1,17 +1,22 @@
-/** @file write.S
- *
- * @brief write sycall wrapper
- *
- * @author Mike Kasick <mkasick@andrew.cmu.edu>
- * @date   Sun, 07 Oct 2007 01:53:46 -0400
- *
- * @author Kartik Subramanian <ksubrama@andrew.cmu.edu>
- * @date 2008-10-29
- */
+@ write.S: write sycall wrapper
+@
+@ Authors: William Westlin <williamawestlin@gmail.com>
+@          Martin (Yian) Gao <martin701.gao@gmail.com>
+@		   Xinwu Yang <xinwuy@gmail.com>
+@ Date:    10/06/2012
+#include <bits/swi.h>
+	.file	"write.S"
+	.text
 
-#include <asm.h>
-
-	.file "write.S"
-
-FUNC(write)
-	@ Add code here.  Put your names at the top.
+	.global	write
+write:
+	@ Needs more code.
+	swi	WRITE_SWI
+	cmp	r0, #0
+	bge	success
+	rsb r0, #0
+	ldr	r2, =errno
+	str	r0, [r2]
+	mov	r0, #-1	
+success:
+	mov	pc, lr
