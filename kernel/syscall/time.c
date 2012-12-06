@@ -15,7 +15,7 @@
 
 unsigned long time_syscall(void)
 {
- return 1; /* remove this line after adding your code here */	
+ 	return (current_time - start_time) / (OSTMR_FREQ/1000);
 }
 
 
@@ -28,5 +28,11 @@ unsigned long time_syscall(void)
  */
 void sleep_syscall(unsigned long millis  __attribute__((unused)))
 {
-	
+	/* Enable IRQ */
+	asm("mrs r12, cpsr");
+	asm("bic r12, r12, #0x80");
+	asm("msr cpsr, r12");
+
+	const size_t endTime = current_time + duration * (OSTMR_FREQ/1000);
+	while (current_time < endTime);
 }
