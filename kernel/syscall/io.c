@@ -25,7 +25,57 @@
 ssize_t read_syscall(int fd __attribute__((unused)), void *buf __attribute__((unused)), size_t count __attribute__((unused)))
 {
 
-  return 1; /* remove this return line after you have added your code here */
+  /* U-Boot can only write to stdout */
+	if (fd != STDIN_FILENO) {
+		return -EBADF;
+	}
+	// Check buffer's memory range to make sure it's inside readable memory
+	if (((unsigned int)buf  <  (unsigned int)0xa0000000) || (((unsigned int)(((unsigned int*) buf) + count)) > (unsigned int)0xa3ffffff)) {
+	return -EFAULT;
+	}
+	ssize_t num_read = 0;
+	/*
+	 * the buffer has to be null terminated, so last char must be '\0'
+	 * hence at most can read in count - 1 characters from stdin
+	 */
+	if (count == 0) return num_read;
+	while (((size_t)num_read) < count )
+	{
+		int character = getc();
+		switch (character)
+		{
+			/* EOT character */
+			case 4:
+				return num_read;
+			
+			/* Backspace or Delete */
+			case 8:
+			case 127:
+				if (num_read > 0)
+				{
+					num_read --;
+					puts("\b \b");
+				}
+				
+			
+			/* Newline or carriage return*/
+			case 10:
+			case 13:
+				((char*) buf)[num_read] = '\n';
+				putc('\n');
+				num_read ++;
+				return num_read;
+			
+			/* Normal characters */
+			default:
+				((char*) buf)[num_read] = character;
+				putc(character);
+				num_read++;
+		}
+	}
+	
+	
+	return num_read;
 	
 }
 
@@ -33,7 +83,33 @@ ssize_t read_syscall(int fd __attribute__((unused)), void *buf __attribute__((un
 ssize_t write_syscall(int fd  __attribute__((unused)), const void *buf  __attribute__((unused)), size_t count  __attribute__((unused)))
 {
 
-  return 1; /* remove this return line after you have added your code here */
+  // U-Boot can only write to stdout
+	if (fd != STDOUT_FILENO) {
+	  return -EBADF;
+	}
+	
+	unsigned int bufLow = (unsigned int) buf;
+	unsigned int bufHi = (unsigned int) (((unsigned int*)buf) + count);
+	// Check buffer's memory range to make sure it's inside readable memory
+	if (!((  ((bufLow > (unsigned int) 0x0) && (bufHi < (unsigned int) 0x00ffffff)) ||
+		(bufLow > (unsigned int) 0xa0000000 && (bufHi < (unsigned int) 0xa3ffffff))	))){
+	  return -EFAULT;
+	}
+	
+	ssize_t wri_num = 0;
+	
+	int whileloopCounter = 0;
+	while (((size_t)wri_num) < count)
+	{	
+		whileloopCounter ++;
+		// make sure buffer is not empty
+		if (((char*)buf)[wri_num] == '\0') break;
+		else{
+			putc(((char*)buf)[wri_num]);
+			wri_num ++;
+		}
+	}
+	return wri_num;
 	
 }
 

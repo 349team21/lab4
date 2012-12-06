@@ -61,9 +61,9 @@ void allocate_tasks(task_t** tasks  __attribute__((unused)), size_t num_tasks  _
 		tcb->cur_prio = i;
 		tcb->holds_lock = 0;
 		tcb->sleep_queue = (tcb_t*) 0;
-		tcb->context.r4 = (*tasks)[i].lambda;
-		tcb->context.r5 = (*tasks)[i].data;
-		tcb->context.r6 = (*tasks)[i].stack_pos;
+		tcb->context.r4 = (uint32_t)(*tasks)[i].lambda;
+		tcb->context.r5 = (uint32_t)(*tasks)[i].data;
+		tcb->context.r6 = (uint32_t)(*tasks)[i].stack_pos;
 		runqueue_add(tcb, i);
 	}
 
@@ -73,10 +73,10 @@ void allocate_tasks(task_t** tasks  __attribute__((unused)), size_t num_tasks  _
 	tcb->cur_prio = OS_MAX_TASKS - 1;
 	tcb->holds_lock = 0;
 	tcb->sleep_queue = (tcb_t*) 0;
-	tcb->context.r4 = &idle;
+	tcb->context.r4 = (uint32_t)&idle;
 
 	//add idle task
-	dispatch_init(idle);
+	dispatch_init(tcb);
 	
 	//call dispatch_nosave
 	dispatch_nosave();
