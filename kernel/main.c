@@ -55,7 +55,6 @@ int kmain(int argc __attribute__((unused)), char** argv  __attribute__((unused))
 	long swi_offset;
 	long irq_offset;
 
-	printf("Checkpoint 1...\n");
 	
 	
 	
@@ -82,8 +81,6 @@ int kmain(int argc __attribute__((unused)), char** argv  __attribute__((unused))
 	*(old_swi_handler  ) = LDR_PC_NEXT;
 	*(old_swi_handler + 1) = (unsigned long) &handleSWI;
 
-	printf("Checkpoint 2...\n");
-	
 	
 	
 	
@@ -103,7 +100,6 @@ int kmain(int argc __attribute__((unused)), char** argv  __attribute__((unused))
 		irq_offset = -(irq_vector & LDR_IMM_MASK);
 	}
 
-	printf("Checkpoint 3...\n");
 
 	/* Find the location of U-Boot's SWI/IRQ handler. */
 	old_irq_handler = *(unsigned long **)(IRQ_VECTOR_ADDR + PC_OFFSET + irq_offset);
@@ -112,19 +108,13 @@ int kmain(int argc __attribute__((unused)), char** argv  __attribute__((unused))
 	*(old_irq_handler  ) = LDR_PC_NEXT;
 	*(old_irq_handler+1) = (unsigned long) &handleIRQ;
 
-	printf("Checkpoint 4...\n");
 
 	//initialize timers
 	time_init();
-
-	printf("Checkpoint 5...\n");
 	
 	// Initialize mutexes
 	mutex_init();
 
-	printf("Checkpoint 6...\n");
-
-	printf("MAKING USER SWITCH\n");
 	toUSER(argc, argv);
 	
 	assert(0);        /* should never get here */

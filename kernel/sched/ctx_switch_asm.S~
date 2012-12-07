@@ -53,3 +53,4 @@ FUNC(ctx_switch_half)
 	@load context and go to entry point
 	ldmfd	r0, {r4-r11, sp, lr}
 	mov	pc, lr
+

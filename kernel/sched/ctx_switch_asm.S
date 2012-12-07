@@ -11,6 +11,8 @@
  */
 
 	.file "ctx_switch_asm.S"
+	.global launch_task
+	.type launch_task, %function
 
 #include <asm.h>
 #include <arm/psr.h>

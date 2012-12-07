@@ -13,6 +13,7 @@
 #include <syscall.h>
 #include <arm/interrupt.h>
 #include <arm/reg.h>
+#include <exports.h>
 
 volatile size_t start_time;
 volatile size_t current_time;
@@ -42,6 +43,7 @@ void time_init(void)
 // IRQ interrupt
 void interrupt(void){
 
+	printf("INTERRUPTED!\n");
 	current_time = reg_read(OSTMR_OSCR_ADDR);
 	reg_set(OSTMR_OSSR_ADDR, OSTMR_OSSR_M0);
 	reg_write(OSTMR_OSMR_ADDR(0), current_time + (OSTMR_FREQ/100));
