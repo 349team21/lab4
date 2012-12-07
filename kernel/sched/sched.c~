@@ -21,6 +21,10 @@
 
 tcb_t system_tcb[OS_MAX_TASKS]; /*allocate memory for system TCBs */
 
+void task_setup(tcb_t* task_tcb, task_t task, unsigned prio);
+void idle_task_setup(tcb_t* idle_task);
+void bubble_sort(task_t tasks[], size_t array_size);
+
 void sched_init(task_t* main_task  __attribute__((unused)))
 {
 	
@@ -50,16 +54,12 @@ static void __attribute__((unused)) idle(void)
  * @param tasks  A list of scheduled task descriptors.
  * @param size   The number of tasks is the list.
  */
-void allocate_tasks(task_t** tasks  __attribute__((unused)), size_t num_tasks)
+void allocate_tasks(task_t** tasks  __attribute__((unused)), size_t num_tasks __attribute__((unused)))
 {
 	uint8_t i;
 	tcb_t* tcb;
 	size_t num = num_tasks;
 	task_t** tTasks = tasks;
-
-
-	runqueue_init();
-
 
 	for(i = 0; i < num; i++){
 		tcb = &system_tcb[i];
@@ -86,10 +86,9 @@ void allocate_tasks(task_t** tasks  __attribute__((unused)), size_t num_tasks)
 
 
 	//add idle task
+	printf("dispatch init before \n");
 	dispatch_init(tcb);
-
-	//call dispatch_nosave
-	dispatch_nosave();
+	printf("dispatch init after and done in allocate task \n");
 	
 }
 

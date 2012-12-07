@@ -67,7 +67,7 @@ void allocate_tasks(task_t** tasks  __attribute__((unused)), size_t num_tasks __
 		tcb->cur_prio = i;
 		tcb->holds_lock = 0;
 		tcb->sleep_queue = (tcb_t*) 0;
-		tcb->context.r4 = (uint32_t)idle;
+		tcb->context.r4 = (uint32_t)(*tTasks)[i].lambda;
 		tcb->context.r5 = (uint32_t)(*tTasks)[i].data;
 		tcb->context.r6 = (uint32_t)(*tTasks)[i].stack_pos;
 		tcb->context.lr = (void*)launch_task;
