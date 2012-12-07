@@ -55,17 +55,17 @@ void dispatch_save(void)
 	hi_tcb = run_list[hi_prio];
 	
 	if (hi_tcb == cur_tcb){
-		printf("RETURNING HERE");
+		printf("dispatch save hi tcb = cur tcb \n");
 	 	return;
 	}
 
-	printf("Not cur task! Doing context switch\n");
+	printf("Not cur task! Doing context full switch\n");
 
 	tcb_t* prev;
 	prev = cur_tcb;
 	cur_tcb = hi_tcb;
 
-	ctx_switch_full(&(cur_tcb->context), &(prev->context));
+	ctx_switch_full(&(hi_tcb->context), &(prev->context));
 
 }
 
@@ -86,15 +86,15 @@ void dispatch_nosave(void)
 	hi_tcb = run_list[hi_prio];
 	
 	if (hi_tcb == cur_tcb){
-		printf("RETURNING HERE");
+		printf("dispatch save hi tcb = cur tcb \n");
 	 	return;
 	}
 
-	printf("Not cur task! Doing context switch\n");
+	printf("Not cur task! Doing context half switch\n");
 
 	cur_tcb = hi_tcb;
 
-	ctx_switch_half(&(cur_tcb->context));
+	ctx_switch_half(&(hi_tcb->context));
 
 }
 

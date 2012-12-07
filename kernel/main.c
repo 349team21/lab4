@@ -108,13 +108,15 @@ int kmain(int argc __attribute__((unused)), char** argv  __attribute__((unused))
 	*(old_irq_handler  ) = LDR_PC_NEXT;
 	*(old_irq_handler+1) = (unsigned long) &handleIRQ;
 
-
+	printf("checkpoint 1 \n");
 	//initialize timers
 	time_init();
 	
+	printf("checkpoint 2 \n");
 	// Initialize mutexes
 	mutex_init();
 
+	printf("make it to user switch \n");
 	toUSER(argc, argv);
 	
 	assert(0);        /* should never get here */
@@ -122,15 +124,12 @@ int kmain(int argc __attribute__((unused)), char** argv  __attribute__((unused))
 	return 42;
 }
 
-/*
- * swi dispatcher takes two parameters: swi number and a pointer to the 
- * corresponding argument 
- */ 
+
 int my_swi_dispatcher(int swi_number, int* args_ptr)
 {
 	// return value
 	int result = 0;
-	
+	printf("inside swi dispatcher \n");
 	switch (swi_number)
 
 	{
@@ -146,17 +145,41 @@ int my_swi_dispatcher(int swi_number, int* args_ptr)
 			break;
 
 		case CREATE_SWI:
+			printf("swi create \n");
 			//create takes two parameters: task_t* tasks, size_t num_tasks
 			result = (int) task_create((task_t*)args_ptr[0], (size_t) args_ptr[1]);
+			
+		case TIME_SWI:
+		    result = (int) time_syscall();
+		    break;
 
+		case SLEEP_SWI:
+			sleep_syscall(args_ptr[0]);
+		    break;
+
+		case MUTEX_CREATE:
+		    result = mutex_create();
+		    break;
+
+		case MUTEX_LOCK:
+		    result = mutex_lock(args_ptr[0]);
+		    break;
+
+		case MUTEX_UNLOCK:
+		    result = mutex_unlock(args_ptr[0]);
+		    break;
+
+		case EVENT_WAIT:
+		    result = event_wait(args_ptr[0]);
+		    break;
+				
 		default:
 			invalid_syscall(swi_number);
 			break;
+		
 	}
 	return result;
 }
-
-
 
 
 

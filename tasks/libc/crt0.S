@@ -9,6 +9,12 @@
 #include <asm.h>
 
 	.file "crt0.S"
-
+        .text
+	
+	.global	_start
 FUNC(_start)
-	@ needs code.  Put your names at the top.
+    ldr r0, [sp]
+    add r1, sp, #4 
+    bl  main
+loop:
+    b	loop

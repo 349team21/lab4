@@ -39,14 +39,42 @@ int task_create(task_t* tasks  __attribute__((unused)), size_t num_tasks  __attr
 	if(!assign_schedule(&savedTasks, savedNum))
 		return -ESCHED;
 
-	allocate_tasks(&savedTasks, savedNum);
+	printf("disable interrupts \n");
+	disable_interrupts();
 
-  return 1; /* remove this line after adding your code */
+	printf("run queue init \n");
+	runqueue_init();
+
+	printf("dev init \n");
+	dev_init();
+
+	printf("allocate tasks \n");
+	allocate_tasks(&tasks, savedNum);
+
+	printf("dispatch to first task \n");
+	dispatch_nosave();
+	
+  	return 0xbadc0de;
 }
 
 int event_wait(unsigned int dev  __attribute__((unused)))
 {
-  return 1; /* remove this line after adding your code */	
+	disable_interrupts();
+
+	if (dev > 3){
+		enable_interrupts();
+		return EINVAL;
+	}
+
+	tcb_t* cur_tcb;
+	cur_tcb = get_cur_tcb();
+	runqueue_remove(cur_tcb->cur_prio);
+
+	// put cur_tcb onto the sleep_queue
+	dev_wait(dev);
+	dispatch_save();
+
+	return 0;
 }
 
 /* An invalid syscall causes the kernel to exit. */

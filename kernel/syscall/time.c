@@ -14,6 +14,17 @@
 #include <arm/interrupt.h>
 #include <arm/reg.h>
 #include <exports.h>
+#include <device.h>
+#include <sched.h>
+#include <arm/psr.h>
+#include <kernel.h>
+#include <exports.h>
+
+#include <arm/exception.h>
+#include <exports.h>
+#include <task.h>
+#include <device.h>
+#include <sched.h>
 
 volatile size_t start_time;
 volatile size_t current_time;
@@ -37,18 +48,24 @@ void time_init(void)
 	reg_write(OSTMR_OSCR_ADDR, 0x0);
 	start_time = reg_read(OSTMR_OSCR_ADDR);
 	reg_write(OSTMR_OSMR_ADDR(0), start_time + (OSTMR_FREQ/100));
-
+	
+	printf("done with time init \n");
 }
 
-// IRQ interrupt
-void interrupt(void){
 
+
+void irq_handler(void) {
 	printf("INTERRUPTED!\n");
+	disable_interrupts();
 	current_time = reg_read(OSTMR_OSCR_ADDR);
+	unsigned int actual_time = current_time/OSTMR_FREQ;
+	dev_update(actual_time);
 	reg_set(OSTMR_OSSR_ADDR, OSTMR_OSSR_M0);
 	reg_write(OSTMR_OSMR_ADDR(0), current_time + (OSTMR_FREQ/100));
-	
+
+	dispatch_save();
 }
+
 
 /** @brief Waits in a tight loop for atleast the given number of milliseconds.
  *
