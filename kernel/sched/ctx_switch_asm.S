@@ -49,7 +49,7 @@ FUNC(ctx_switch_full)
 	ldmfd	r0, {r4-r11, sp, lr}
 	mov	pc, lr
 
-m
+
 /*add your code to perform a half context switch */	
 FUNC(ctx_switch_half)
 	@load context and go to entry point
