@@ -12,6 +12,7 @@
 #include <kernel.h>
 #include <config.h>
 #include "sched_i.h"
+#include <sched.h>
 
 #include <arm/reg.h>
 #include <arm/psr.h>
@@ -31,6 +32,7 @@ void sched_init(task_t* main_task  __attribute__((unused)))
  
 static void __attribute__((unused)) idle(void)
 {
+	printf("IN IDLE!\n");
 	 enable_interrupts();
 	 while(1);
 }
@@ -48,30 +50,30 @@ static void __attribute__((unused)) idle(void)
  * @param tasks  A list of scheduled task descriptors.
  * @param size   The number of tasks is the list.
  */
-void allocate_tasks(task_t** tasks  __attribute__((unused)), size_t num_tasks  __attribute__((unused)))
+void allocate_tasks(task_t** tasks  __attribute__((unused)), size_t num_tasks __attribute__((unused)))
 {
 	uint8_t i;
 	tcb_t* tcb;
+	size_t num = num_tasks;
+	task_t** tTasks = tasks;
 
-	printf("Checkpoint 9...\n");
 
 	runqueue_init();
 
-	printf("Checkpoint 10...\n");
 
-	for(i = 0; i < num_tasks; i++){
+	for(i = 0; i < num; i++){
 		tcb = &system_tcb[i];
 		tcb->native_prio = i;
 		tcb->cur_prio = i;
 		tcb->holds_lock = 0;
 		tcb->sleep_queue = (tcb_t*) 0;
-		tcb->context.r4 = (uint32_t)(*tasks)[i].lambda;
-		tcb->context.r5 = (uint32_t)(*tasks)[i].data;
-		tcb->context.r6 = (uint32_t)(*tasks)[i].stack_pos;
+		tcb->context.r4 = (uint32_t)idle;
+		tcb->context.r5 = (uint32_t)(*tTasks)[i].data;
+		tcb->context.r6 = (uint32_t)(*tTasks)[i].stack_pos;
+		tcb->context.lr = (void*)launch_task;
 		runqueue_add(tcb, i);
 	}
 
-	printf("Checkpoint 11...\n");
 
 	//set up idle tcb
 	tcb = &system_tcb[OS_MAX_TASKS - 1];
@@ -79,14 +81,12 @@ void allocate_tasks(task_t** tasks  __attribute__((unused)), size_t num_tasks  _
 	tcb->cur_prio = OS_MAX_TASKS - 1;
 	tcb->holds_lock = 0;
 	tcb->sleep_queue = (tcb_t*) 0;
-	tcb->context.r4 = (uint32_t)&idle;
+	tcb->context.r4 = (uint32_t)idle;
+	tcb->context.lr = (void*)launch_task;
 
-	printf("Checkpoint 12...\n");
 
 	//add idle task
 	dispatch_init(tcb);
-	
-	printf("Checkpoint 13...\n");
 
 	//call dispatch_nosave
 	dispatch_nosave();

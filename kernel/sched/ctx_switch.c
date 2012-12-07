@@ -29,8 +29,10 @@ static __attribute__((unused)) tcb_t* cur_tcb; /* use this if needed */
  */
 void dispatch_init(tcb_t* idle __attribute__((unused)))
 {
-	cur_tcb = idle;
-	runqueue_add(cur_tcb, OS_MAX_TASKS - 1); //lowest priority for idle task
+	tcb_t* savedIdle = idle;
+	uint8_t num = OS_MAX_TASKS - 1;
+	cur_tcb = savedIdle;
+	runqueue_add(cur_tcb, num); //lowest priority for idle task
 }
 
 
@@ -46,11 +48,18 @@ void dispatch_save(void)
 {
 	uint8_t hi_prio;
 	hi_prio = highest_prio();
+
+	printf("Highest priority = %i\n", hi_prio);
 	
 	tcb_t* hi_tcb;
 	hi_tcb = run_list[hi_prio];
 	
-	if (hi_tcb == cur_tcb) return;
+	if (hi_tcb == cur_tcb){
+		printf("RETURNING HERE");
+	 	return;
+	}
+
+	printf("Not cur task! Doing context switch\n");
 
 	tcb_t* prev;
 	prev = cur_tcb;
@@ -71,10 +80,17 @@ void dispatch_nosave(void)
 	uint8_t hi_prio;
 	hi_prio = highest_prio();
 	
+	printf("Highest priority = %i\n", hi_prio);
+	
 	tcb_t* hi_tcb;
 	hi_tcb = run_list[hi_prio];
 	
-	if (hi_tcb == cur_tcb) return;
+	if (hi_tcb == cur_tcb){
+		printf("RETURNING HERE");
+	 	return;
+	}
+
+	printf("Not cur task! Doing context switch\n");
 
 	cur_tcb = hi_tcb;
 

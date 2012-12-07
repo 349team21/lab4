@@ -25,9 +25,10 @@
 int task_create(task_t* tasks  __attribute__((unused)), size_t num_tasks  __attribute__((unused)))
 {
 
-	printf("Checkpoint 7...\n");
+	task_t* savedTasks = tasks;
+	size_t savedNum = num_tasks;
 
-	if(num_tasks > OS_MAX_TASKS - 2)
+	if(savedNum > OS_MAX_TASKS - 2)
 		return -EINVAL;
 
 	//TODO check these bounds are right
@@ -35,12 +36,10 @@ int task_create(task_t* tasks  __attribute__((unused)), size_t num_tasks  __attr
 		return -EFAULT;
 	}
 
-	printf("Checkpoint 8...\n");
-
-	if(!assign_schedule(&tasks, num_tasks))
+	if(!assign_schedule(&savedTasks, savedNum))
 		return -ESCHED;
 
-	allocate_tasks(&tasks, num_tasks);
+	allocate_tasks(&savedTasks, savedNum);
 
   return 1; /* remove this line after adding your code */
 }
