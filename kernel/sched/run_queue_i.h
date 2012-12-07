@@ -54,4 +54,6 @@ static uint8_t prio_unmap_table[]  __attribute__((unused)) =
 4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0
 };
 
+tcb_t* getRunlistTcb(uint8_t prio);
+
 #endif /* _SCHED_I_H_ */

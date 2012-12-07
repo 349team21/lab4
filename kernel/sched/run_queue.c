@@ -25,6 +25,14 @@ void runqueue_init(void)
 	}
 }
 
+//Helper function to return a tcb from the runlist
+tcb_t* getRunlistTcb(uint8_t prio)
+{
+
+	return run_list[prio];
+
+}
+
 /**
  * @brief Adds the thread identified by the given TCB to the runqueue at
  * a given priority.

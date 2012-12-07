@@ -52,7 +52,7 @@ void dispatch_save(void)
 	printf("Highest priority = %i\n", hi_prio);
 	
 	tcb_t* hi_tcb;
-	hi_tcb = run_list[hi_prio];
+	hi_tcb = getRunlistTcb(hi_prio);
 	
 	if (hi_tcb == cur_tcb){
 		printf("dispatch save hi tcb = cur tcb \n");
@@ -83,7 +83,7 @@ void dispatch_nosave(void)
 	printf("Highest priority = %i\n", hi_prio);
 	
 	tcb_t* hi_tcb;
-	hi_tcb = run_list[hi_prio];
+	hi_tcb = getRunlistTcb(hi_prio);
 	
 	if (hi_tcb == cur_tcb){
 		printf("dispatch save hi tcb = cur tcb \n");

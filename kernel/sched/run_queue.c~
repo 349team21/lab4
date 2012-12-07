@@ -21,7 +21,6 @@ void runqueue_init(void)
 		run_bits[i] = 0;
 	}
 	for (i = 0; i < OS_MAX_TASKS; i++) {
-		//run_list[i] = NULL; ?
 		run_list[i] = (tcb_t*) 0;
 	}
 }
