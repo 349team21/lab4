@@ -19,7 +19,6 @@
 #include <arm/physmem.h>
 
 tcb_t system_tcb[OS_MAX_TASKS]; /*allocate memory for system TCBs */
-void bubble_sort(task_t tasks[], size_t array_size);
 void idle_task_setup(tcb_t* idle_task);
 void task_setup(tcb_t* task_tcb, task_t task, unsigned prio);
 
@@ -60,7 +59,6 @@ static void __attribute__((unused)) idle(void)
 void allocate_tasks(task_t** tasks  __attribute__((unused)), size_t num_tasks  __attribute__((unused)))
 {
 	unsigned int i;
-	bubble_sort(*tasks, num_tasks);
 	
 	idle_task_setup(&(system_tcb[IDLE_PRIO]));
 	runqueue_add (&(system_tcb[IDLE_PRIO]),
@@ -69,23 +67,6 @@ void allocate_tasks(task_t** tasks  __attribute__((unused)), size_t num_tasks  _
 	for (i = 0; i < num_tasks; i++){
 		task_setup (&(system_tcb[i]), (*tasks)[i], i+1);
 		runqueue_add(&(system_tcb[i]), system_tcb[i].native_prio);
-	}
-}
-
-
-void bubble_sort(task_t tasks[], size_t array_size)
-{
-	unsigned i, j;
-	task_t temp;
- 
-	for (i = (array_size-1); i>0; i--){
-		for (j = 1; j <= i; j++){
-			if (tasks[j-1].T > tasks[j].T){
-				temp = tasks[j-1];
-				tasks[j-1] = tasks[j];
-				tasks[j] = temp;
-			}
-		}
 	}
 }
 

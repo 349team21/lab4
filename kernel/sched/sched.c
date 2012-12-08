@@ -65,7 +65,7 @@ void allocate_tasks(task_t** tasks  __attribute__((unused)), size_t num_tasks  _
 		system_tcb[IDLE_PRIO].native_prio);
 	
 	for (i = 0; i < num_tasks; i++){
-		task_setup (&(system_tcb[i]), (*tasks)[i], i+1);
+		task_setup(&(system_tcb[i]), (*tasks)[i], i+1);
 		runqueue_add(&(system_tcb[i]), system_tcb[i].native_prio);
 	}
 }
