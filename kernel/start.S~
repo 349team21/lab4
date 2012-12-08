@@ -63,20 +63,19 @@ handleSWI:
 	add r1, r1, #4
 	
 	@ Enable IRQs
-	msr	cpsr_c, #ENABLE_IRQ
+	@msr	cpsr_c, #ENABLE_IRQ
 	
 	bl	my_swi_dispatcher
 
 	@ Disable IRQs
-	msr	cpsr_c, #DISABLE_IRQ
+	@msr	cpsr_c, #DISABLE_IRQ
 	
 	@ Return to user mode.
 	ldmfd    sp!, {r12}
 	msr      spsr, r12
 	
 	add		sp, sp, #4
-	ldmfd	sp, {r1-r12, sp, lr}
-	mov pc, lr
+	ldmfd	sp, {r1-r12, sp, pc}^
 
 
 handleIRQ:

@@ -75,8 +75,7 @@ handleSWI:
 	msr      spsr, r12
 	
 	add		sp, sp, #4
-	ldmfd	sp, {r1-r12, sp, lr}
-	mov pc, lr
+	ldmfd	sp, {r1-r12, sp, pc}^
 
 
 handleIRQ:
