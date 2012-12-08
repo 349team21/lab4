@@ -33,7 +33,7 @@ void fun2(void* str)
 	while(1)
 	{
 		putchar((int)str);
-		if (event_wait(1) < 0)
+		if (event_wait(2) < 0)
 			panic("Dev 1 failed");
 	}
 }

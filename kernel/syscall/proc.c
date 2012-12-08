@@ -25,10 +25,18 @@
 int task_create(task_t* tasks  __attribute__((unused)), 
 		size_t num_tasks  __attribute__((unused)))
 {
-	//at most 62 tasks, one for idle, one for priority inversion
-	if (num_tasks > OS_MAX_TASKS - 2)	return EINVAL;
-
 	disable_interrupts();
+
+	//at most 62 tasks, one for idle, one for priority inversion
+	if (num_tasks > OS_MAX_TASKS - 2)	return -EINVAL;
+
+	if (((size_t)tasks  <  (size_t)0xa0000000) || ((size_t)tasks > (size_t)0xa3ffffff)) {
+		return -EFAULT;
+	}
+
+	if(!assign_schedule(&tasks, num_tasks))
+		return -ESCHED;
+
 	runqueue_init();
 	dev_init();
 	allocate_tasks(&tasks, num_tasks);

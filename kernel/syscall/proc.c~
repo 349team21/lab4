@@ -22,32 +22,50 @@
 #include <arm/physmem.h>
 #include <device.h>
 
-int task_create(task_t* tasks  __attribute__((unused)), size_t num_tasks  __attribute__((unused)))
+int task_create(task_t* tasks  __attribute__((unused)), 
+		size_t num_tasks  __attribute__((unused)))
 {
+	disable_interrupts();
 
-	task_t* savedTasks = tasks;
-	size_t savedNum = num_tasks;
+	//at most 62 tasks, one for idle, one for priority inversion
+	if (num_tasks > OS_MAX_TASKS - 2)	return -EINVAL;
 
-	if(savedNum > OS_MAX_TASKS - 2)
-		return -EINVAL;
-
-	//TODO check these bounds are right
 	if (((size_t)tasks  <  (size_t)0xa0000000) || ((size_t)tasks > (size_t)0xa3ffffff)) {
 		return -EFAULT;
 	}
 
-	if(!assign_schedule(&savedTasks, savedNum))
+	if(assign_schedule(&tasks, num_tasks))
 		return -ESCHED;
 
-	allocate_tasks(&savedTasks, num_tasks);
+	runqueue_init();
+	dev_init();
+	allocate_tasks(&tasks, num_tasks);
+	dispatch_nosave();
 
-  return 1; /* remove this line after adding your code */
+  	return 0xbadc0de;
 }
 
 int event_wait(unsigned int dev  __attribute__((unused)))
 {
-  return 1; /* remove this line after adding your code */	
+	tcb_t* cur_tcb;
+
+	disable_interrupts();
+
+	if (dev > 3){
+		enable_interrupts();
+		return EINVAL;
+	}
+
+	cur_tcb = get_cur_tcb();
+	runqueue_remove(cur_tcb->cur_prio);
+
+	dev_wait(dev);
+
+	dispatch_save();
+
+	return 0;
 }
+
 
 /* An invalid syscall causes the kernel to exit. */
 void invalid_syscall(unsigned int call_num  __attribute__((unused)))
@@ -57,3 +75,5 @@ void invalid_syscall(unsigned int call_num  __attribute__((unused)))
 	disable_interrupts();
 	while(1);
 }
+
+

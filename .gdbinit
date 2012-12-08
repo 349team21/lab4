@@ -14,6 +14,7 @@ b dispatch_init
 b dispatch_nosave
 b dispatch_save
 b dev_update
+b assign_schedule
 b *(_start)
 b *(handleSWI)
 b *(handleIRQ)
