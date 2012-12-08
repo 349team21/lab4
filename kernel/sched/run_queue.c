@@ -6,31 +6,67 @@
  * @date 2008-11-21
  */
 
-#include "run_queue_i.h"
+#include <types.h>
+#include <assert.h>
 
+#include <kernel.h>
+#include <sched.h>
+#include "sched_i.h"
+
+
+
+static tcb_t* run_list[OS_MAX_TASKS]  __attribute__((unused));
+
+/* A high bit in this bitmap means that the task whose priority is
+ * equal to the bit number of the high bit is runnable.
+ */
+static uint8_t run_bits[OS_MAX_TASKS/8] __attribute__((unused));
+
+/* This is a trie structure.  Tasks are grouped in groups of 8.  If any task
+ * in a particular group is runnable, the corresponding group flag is set.
+ * Since we can only have 64 possible tasks, a single byte can represent the
+ * run bits of all 8 groups.
+ */
+static uint8_t group_run_bits __attribute__((unused));
+
+/* This unmap table finds the bit position of the lowest bit in a given byte
+ * Useful for doing reverse lookup.
+ */
+static uint8_t prio_unmap_table[]  __attribute__((unused)) =
+{
+
+0, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+6, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+7, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+6, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0
+};
 
 /**
  * @brief Clears the run-queues and sets them all to empty.
  */
 void runqueue_init(void)
 {
+	int i;
+
 	group_run_bits = 0;
-	unsigned int i;
-	// we know there are 8 groups
-	for (i = 0; i < 8; i++) {
+	
+	for(i = 0; i < OS_MAX_TASKS/8; i++)
 		run_bits[i] = 0;
-	}
-	for (i = 0; i < OS_MAX_TASKS; i++) {
+
+	for(i = 0; i < OS_MAX_TASKS; i++)
 		run_list[i] = (tcb_t*) 0;
-	}
-}
-
-//Helper function to return a tcb from the runlist
-tcb_t* getRunlistTcb(uint8_t prio)
-{
-
-	return run_list[prio];
-
 }
 
 /**
@@ -43,20 +79,11 @@ tcb_t* getRunlistTcb(uint8_t prio)
  */
 void runqueue_add(tcb_t* tcb  __attribute__((unused)), uint8_t prio  __attribute__((unused)))
 {
-	// under the presumption that priority is unique for each tcb
-	// update the run list
+	uint8_t group;
+	group = prio >> 3;
+	group_run_bits = (group_run_bits) | (0x01 << group);
+	run_bits[group] = run_bits[group] | (0x01 << (prio & 0x07));
 	run_list[prio] = tcb;
-
-	
-	// update group_run_bits
-	uint8_t y;
-	y = prio >> 3;
-	group_run_bits = group_run_bits | (0x01 << y);
-	
-	// update run_bits[]
-	uint8_t x;
-	x = prio & 0x07;
-	run_bits[y] = run_bits[y] | (0x01 << x);
 }
 
 
@@ -69,22 +96,19 @@ void runqueue_add(tcb_t* tcb  __attribute__((unused)), uint8_t prio  __attribute
  */
 tcb_t* runqueue_remove(uint8_t prio  __attribute__((unused)))
 {
-	// update the run_list
-	tcb_t* tcb = run_list[prio];
+	uint8_t group;
+	tcb_t* tcb;
+	group = prio >> 3;
+	run_bits[group] = run_bits[group] & (~(0x01 << (prio & 0x07)));
+
+	if (!run_bits[group]){
+		group_run_bits = (group_run_bits) & (~(0x01 << group));
+	}
+	
+	tcb = run_list[prio];
 	run_list[prio] = (tcb_t*) 0;
 
-
-	// update group_run_bits
-	uint8_t y;
-	y = prio >> 3;
-	group_run_bits = (group_run_bits) & (~(0x01 << y));
-	
-	// update run_bits[]
-	uint8_t x;
-	x = prio & 0x07;
-	run_bits[y] = run_bits[y] & (~(0x01 << x));
-	
-	return tcb;		
+	return tcb;
 }
 
 /**
@@ -93,10 +117,17 @@ tcb_t* runqueue_remove(uint8_t prio  __attribute__((unused)))
  */
 uint8_t highest_prio(void)
 {
-	// from the lab 4 recitation note second last page
-	uint8_t prio, x, y;
+	uint8_t priority, x, y;
 	y = prio_unmap_table[group_run_bits];
 	x = prio_unmap_table[run_bits[y]];
-	prio = (y << 3) + x;
-	return prio;
+	priority = (y << 3) + x;
+	return priority;	
 }
+
+tcb_t* highest_prio_tcb(void)
+{
+	return run_list[highest_prio()];
+}
+
+
+

@@ -11,8 +11,6 @@
  */
 
 	.file "ctx_switch_asm.S"
-	.global launch_task
-	.type launch_task, %function
 
 #include <asm.h>
 #include <arm/psr.h>
@@ -34,29 +32,21 @@ FUNC(launch_task)
 	mov     r5, #0
 	mov     r8, #0
 	mov     ip, #0
-	msr     cpsr_c, #(PSR_MODE_USR | 0xc0)
+	msr     cpsr_c, #(PSR_MODE_USR)
 	mov     sp, r6
 	mov     r6, #0
 	ldr     lr, =0xdeadbeef   /* Causes a crash instead of calling the reset vector */
 	mov     pc, r4
 
+
 /* r0 points to the target context, r1 to the current context. */
 /* add your code to perform a full context switch */
 FUNC(ctx_switch_full)
-	@save previous context into source region
-	stmfd	r1, {r4-r11, sp, lr}
-	@load current context from target region
+	stmia	r1, {r4-r11, sp, lr}
 	ldmfd	r0, {r4-r11, sp, lr}
-	mov	pc, lr
-
-FUNC(first_launch)
-	@load context and go to entry point
-	ldmfd	r0, {r4-r11, ip, lr}
 	mov	pc, lr
 
 /*add your code to perform a half context switch */	
 FUNC(ctx_switch_half)
-	@load context and go to entry point
 	ldmfd	r0, {r4-r11, sp, lr}
 	mov	pc, lr
-

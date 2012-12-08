@@ -44,11 +44,10 @@ FUNC(_start)
 	b       kmain
 
 handleSWI:
-	//save r0 to r12, sp and lr, in total of 15 registers
-	stmfd	sp, {r0-r12, sp, lr}
-	sub		sp, sp, #60
-	
-	// save spsr
+	stmfd	sp!, {r0-r12, lr}
+	stmfd	sp, {r0-r12, sp, lr}^
+	sub	sp, sp, #60
+
 	mrs      r12, spsr
 	stmfd    sp!, {r12}
 
@@ -60,22 +59,26 @@ handleSWI:
 	ldr	r0, [lr, #-4]
 	bic	r0, r0, #~SWI_IMM_MASK
 	mov	r1, sp
-	add r1, r1, #4
-	
+	add	r1, r1,	#4
+
 	@ Enable IRQs
-	@msr	cpsr_c, #ENABLE_IRQ
-	
+	msr	cpsr_c, #ENABLE_IRQ
+
 	bl	my_swi_dispatcher
 
 	@ Disable IRQs
-	@msr	cpsr_c, #DISABLE_IRQ
-	
-	@ Return to user mode.
+	msr	cpsr_c, #DISABLE_IRQ
+
 	ldmfd    sp!, {r12}
 	msr      spsr, r12
-	
-	add		sp, sp, #4
-	ldmfd	sp, {r1-r12, sp, pc}^
+
+	@ Return to user mode.
+	ldmfd	sp, {r0-r12, sp, lr}^
+	add	sp, sp, #60
+
+	ldmfd	sp!, {r1}
+	ldmfd	sp!, {r1-r12, lr}
+	movs	pc, lr
 
 
 handleIRQ:
@@ -141,7 +144,7 @@ toUSER:
 	str	sp, [ip]
 
 	@ Switch to user mode & load user stack.
-	msr	cpsr_c, #(CPSR_FIQ_FLAG |CPSR_USR_MODE)
+	msr	cpsr_c, #(CPSR_FIQ_FLAG | CPSR_USR_MODE)
 	ldr	sp, =USR_STACK
 
 	@ Push argv NULL terminator.

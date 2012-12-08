@@ -45,8 +45,8 @@ static dev_t devices[NUM_DEVICES];
  */
 void dev_init(void)
 {
-	unsigned int i;
-	for (i = 0; i < NUM_DEVICES; i++){
+	unsigned i;
+	for (i = 0; i < NUM_DEVICES; i ++){
 		devices[i].sleep_queue = (tcb_t*) 0;
 		devices[i].next_match = dev_freq[i];
 	}

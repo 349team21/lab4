@@ -13,13 +13,15 @@
 #include <config.h>
 #include <kernel.h>
 #include "sched_i.h"
-#include "run_queue_i.h"
+#include <arm/psr.h>
+#include <arm/exception.h>
 
 #ifdef DEBUG_MUTEX
 #include <exports.h>
 #endif
 
 static __attribute__((unused)) tcb_t* cur_tcb; /* use this if needed */
+
 
 /**
  * @brief Initialize the current TCB and priority.
@@ -29,10 +31,7 @@ static __attribute__((unused)) tcb_t* cur_tcb; /* use this if needed */
  */
 void dispatch_init(tcb_t* idle __attribute__((unused)))
 {
-	tcb_t* savedIdle = idle;
-	uint8_t num = OS_MAX_TASKS - 1;
-	cur_tcb = savedIdle;
-	runqueue_add(cur_tcb, num); //lowest priority for idle task
+	
 }
 
 
@@ -46,30 +45,17 @@ void dispatch_init(tcb_t* idle __attribute__((unused)))
  */
 void dispatch_save(void)
 {
-	uint8_t hi_prio;
-	hi_prio = highest_prio();
-
-	printf("Highest priority = %i\n", hi_prio);
-	
-	tcb_t* hi_tcb;
-	hi_tcb = getRunlistTcb(hi_prio);
-	
-	if (hi_tcb == cur_tcb){
-		printf("dispatch save hi tcb = cur tcb \n");
-	 	return;
-	}
-
-	printf("Not cur task! Doing context full switch\n");
-
+	tcb_t* hi;
 	tcb_t* prev;
+
+	disable_interrupts();
+	hi = highest_prio_tcb();
+
+	if (hi == cur_tcb) return;
+
 	prev = cur_tcb;
-	cur_tcb = hi_tcb;
-
-	if(hi_tcb->context.lr == launch_task)
-		first_launch(&(hi_tcb->context));
-	else
-		ctx_switch_full(&(hi_tcb->context), &(prev->context));
-
+	cur_tcb = hi;
+	ctx_switch_full(&(hi->context), &(prev->context)); 
 }
 
 /**
@@ -80,28 +66,14 @@ void dispatch_save(void)
  */
 void dispatch_nosave(void)
 {
-	uint8_t hi_prio;
-	hi_prio = highest_prio();
-	
-	printf("Highest priority = %i\n", hi_prio);
-	
-	tcb_t* hi_tcb;
-	hi_tcb = getRunlistTcb(hi_prio);
-	
-	if (hi_tcb == cur_tcb){
-		printf("dispatch save hi tcb = cur tcb \n");
-	 	return;
-	}
+	tcb_t* hi;
 
-	printf("Not cur task! Doing context half switch\n");
+	disable_interrupts();
+	hi = highest_prio_tcb();
+	if (hi == cur_tcb) return;
 
-	cur_tcb = hi_tcb;
-
-	if(hi_tcb->context.lr == launch_task)
-		first_launch(&(hi_tcb->context));
-	else
-		ctx_switch_half(&(hi_tcb->context));
-
+	cur_tcb = hi;
+	ctx_switch_half(&(hi->context));
 }
 
 
@@ -121,9 +93,7 @@ void dispatch_sleep(void)
  */
 uint8_t get_cur_prio(void)
 {
-	uint8_t prio;
-	prio = cur_tcb->cur_prio;
-	return prio;
+	return cur_tcb->cur_prio;
 }
 
 /**
@@ -133,3 +103,5 @@ tcb_t* get_cur_tcb(void)
 {
 	return cur_tcb;
 }
+
+
