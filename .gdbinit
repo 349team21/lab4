@@ -14,14 +14,13 @@ b dispatch_init
 b dispatch_nosave
 b dispatch_save
 b dev_update
-b *0xa0000000
-b *0xa3000000
-b *0xa3000008
-b *0xa300004c
-b *0xa30000a0
-b *0xa30000cc
-b *0xa3000dac
-b *0xa3000ddc
-b *0xa3000de8
-b *0xa0000170
-b *0xa000018c
+b *(_start)
+b *(handleSWI)
+b *(handleIRQ)
+b *(copy_loop)
+b *(launch_task)
+b *(ctx_switch_half)
+b *(loop)
+b *(write)
+b *(success)
+

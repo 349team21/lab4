@@ -68,14 +68,15 @@ handleSWI:
 	bl	my_swi_dispatcher
 
 	@ Disable IRQs
-	msr	cpsr_c, #DISABLE_IRQ
+	@msr	cpsr_c, #DISABLE_IRQ
 	
 	@ Return to user mode.
 	ldmfd    sp!, {r12}
 	msr      spsr, r12
 	
 	add		sp, sp, #4
-	ldmfd	sp!, {r1-r12, pc}^
+	ldmfd	sp, {r1-r12, sp, lr}
+	mov pc, lr
 
 
 handleIRQ:
@@ -141,8 +142,7 @@ toUSER:
 	str	sp, [ip]
 
 	@ Switch to user mode & load user stack.
-	@msr	cpsr_c, #(CPSR_FIQ_FLAG |CPSR_USR_MODE)
-	msr	cpsr_c, #(CPSR_USR_MODE)
+	msr	cpsr_c, #(CPSR_FIQ_FLAG |CPSR_USR_MODE)
 	ldr	sp, =USR_STACK
 
 	@ Push argv NULL terminator.

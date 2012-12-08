@@ -63,7 +63,7 @@ handleSWI:
 	add r1, r1, #4
 	
 	@ Enable IRQs
-	@msr	cpsr_c, #ENABLE_IRQ
+	msr	cpsr_c, #ENABLE_IRQ
 	
 	bl	my_swi_dispatcher
 
@@ -75,7 +75,8 @@ handleSWI:
 	msr      spsr, r12
 	
 	add		sp, sp, #4
-	ldmfd	sp!, {r1-r12, pc}^
+	ldmfd	sp, {r1-r12, sp, lr}
+	mov pc, lr
 
 
 handleIRQ:
@@ -141,7 +142,7 @@ toUSER:
 	str	sp, [ip]
 
 	@ Switch to user mode & load user stack.
-	msr	cpsr_c, #(CPSR_FIQ_FLAG | CPSR_USR_MODE)
+	msr	cpsr_c, #(CPSR_FIQ_FLAG |CPSR_USR_MODE)
 	ldr	sp, =USR_STACK
 
 	@ Push argv NULL terminator.

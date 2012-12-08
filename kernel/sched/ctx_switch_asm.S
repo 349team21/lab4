@@ -34,7 +34,7 @@ FUNC(launch_task)
 	mov     r5, #0
 	mov     r8, #0
 	mov     ip, #0
-	msr     cpsr_c, #(PSR_MODE_USR)
+	msr     cpsr_c, #(PSR_MODE_USR | 0xc0)
 	mov     sp, r6
 	mov     r6, #0
 	ldr     lr, =0xdeadbeef   /* Causes a crash instead of calling the reset vector */
@@ -49,6 +49,10 @@ FUNC(ctx_switch_full)
 	ldmfd	r0, {r4-r11, sp, lr}
 	mov	pc, lr
 
+FUNC(first_launch)
+	@load context and go to entry point
+	ldmfd	r0, {r4-r11, ip, lr}
+	mov	pc, lr
 
 /*add your code to perform a half context switch */	
 FUNC(ctx_switch_half)

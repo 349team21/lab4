@@ -17,6 +17,7 @@ void runqueue_init(void);
 
 void ctx_switch_full(volatile void* next_ctx, volatile void* cur_ctx);
 void ctx_switch_half(volatile void* next_ctx) __attribute__((noreturn));
+void first_launch(volatile void* next_ctx);
 
 /** A list of every TCB+kernel stack that can exist on this system.
  * Note -- this list is not ordered by anything.

@@ -65,7 +65,10 @@ void dispatch_save(void)
 	prev = cur_tcb;
 	cur_tcb = hi_tcb;
 
-	ctx_switch_full(&(hi_tcb->context), &(prev->context));
+	if(hi_tcb->context.lr == launch_task)
+		first_launch(&(hi_tcb->context));
+	else
+		ctx_switch_full(&(hi_tcb->context), &(prev->context));
 
 }
 
@@ -94,7 +97,10 @@ void dispatch_nosave(void)
 
 	cur_tcb = hi_tcb;
 
-	ctx_switch_half(&(hi_tcb->context));
+	if(hi_tcb->context.lr == launch_task)
+		first_launch(&(hi_tcb->context));
+	else
+		ctx_switch_half(&(hi_tcb->context));
 
 }
 
