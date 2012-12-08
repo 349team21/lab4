@@ -40,6 +40,9 @@ extern void handleIRQ(void);
 extern int toUSER(int argc, char* argv[]);
 extern void time_init(void);
 
+/*time in increments of 10ms*/
+volatile uint32_t irq_time = 0x0;
+
 int kmain(int argc __attribute__((unused)), char** argv  __attribute__((unused)), uint32_t table)
 {
 
@@ -110,7 +113,7 @@ int kmain(int argc __attribute__((unused)), char** argv  __attribute__((unused))
 
 	printf("checkpoint 1 \n");
 	//initialize timers
-	time_init();
+	init_timer();
 	
 	printf("checkpoint 2 \n");
 	// Initialize mutexes
@@ -125,11 +128,18 @@ int kmain(int argc __attribute__((unused)), char** argv  __attribute__((unused))
 }
 
 
+
+
+
+
+
+
+
 int my_swi_dispatcher(int swi_number, int* args_ptr)
 {
 	// return value
 	int result = 0;
-	printf("inside swi dispatcher \n");
+//	printf("inside swi dispatcher \n");
 	switch (swi_number)
 
 	{
