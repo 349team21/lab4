@@ -50,7 +50,6 @@ unsigned long time_syscall(void)
 
 
 void irq_handler(void) {
-//	printf("INTERRUPTED!\n");
 	disable_interrupts();
 
 	irq_time ++;
@@ -58,7 +57,7 @@ void irq_handler(void) {
 	reg_set(OSTMR_OSSR_ADDR, OSTMR_OSSR_M0);
 	reg_write(OSTMR_OSCR_ADDR, TIMER_CLEAR);
 
-	/* Make sure interrupt appeased */
+	/* Wait for timer to reset */
 	while(((volatile unsigned)reg_read(INT_ICPR_ADDR) >>INT_OSTMR_0) & 0x1);
 
 	dispatch_save();

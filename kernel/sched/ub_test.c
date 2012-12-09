@@ -34,16 +34,15 @@ int assign_schedule(task_t** tasks  __attribute__((unused)), size_t num_tasks  _
 {
 	long unsigned summation = 0;
 	long unsigned current = 0;
-	task_t* curTask;
+	task_t curTask;
 	int i;
 
 	bubble_sort(*tasks, num_tasks);
 
-	for(i = 1; i < (int) num_tasks + 1; i++){
-		curTask = tasks[i];
-		summation +=  (curTask->C * P_CONSTANT) / curTask->T;
-		current = (curTask->B * P_CONSTANT) / curTask->T;
-		printf("%i: C:%lu T:%lu B:%lu summation:%lu current:%lu rhs_calc:%lu\n", i, curTask->C, curTask->T, curTask->B, summation, current, rhs_calc(i+1));
+	for(i = 1; i < (int) num_tasks + 1; i++){	
+		curTask = (*tasks)[i];	
+		summation +=  (curTask.C * P_CONSTANT) / curTask.T;
+		current = (curTask.B * P_CONSTANT) / curTask.T;
 
 		if( (summation + current ) > rhs_calc(i+1) )
 			return 0;
@@ -55,11 +54,11 @@ int assign_schedule(task_t** tasks  __attribute__((unused)), size_t num_tasks  _
 
 void bubble_sort(task_t tasks[], size_t array_size)
 {
-	unsigned i, j;
+	int i, j;
 	task_t temp;
  
-	for (i = (array_size-1); i>0; i--){
-		for (j = 1; j <= i; j++){
+	for (i = (array_size-1); i>=0; i--){
+		for (j = 0; j <= i; j++){
 			if (tasks[j-1].T > tasks[j].T){
 				temp = tasks[j-1];
 				tasks[j-1] = tasks[j];

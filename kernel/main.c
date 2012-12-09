@@ -111,15 +111,12 @@ int kmain(int argc __attribute__((unused)), char** argv  __attribute__((unused))
 	*(old_irq_handler  ) = LDR_PC_NEXT;
 	*(old_irq_handler+1) = (unsigned long) &handleIRQ;
 
-	printf("checkpoint 1 \n");
 	//initialize timers
 	init_timer();
 	
-	printf("checkpoint 2 \n");
 	// Initialize mutexes
 	mutex_init();
 
-	printf("make it to user switch \n");
 	toUSER(argc, argv);
 	
 	assert(0);        /* should never get here */
